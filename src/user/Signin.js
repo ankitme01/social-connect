@@ -1,14 +1,15 @@
 import { Component } from "react";
-import { signup } from "../auth/index";
-class Signup extends Component {
+import { Redirect } from "react-router-dom";
+import { signin, authenticate } from "../auth/index";
+class Signin extends Component {
   constructor() {
     super();
     this.state = {
-      name: "",
       email: "",
       password: "",
       error: "",
-      open: false,
+      redirectToReferer: false,
+      loading: false,
     };
   }
   handleChange = (name) => (event) => {
@@ -18,36 +19,23 @@ class Signup extends Component {
 
   clickSubmit = (event) => {
     event.preventDefault();
-    const { name, email, password } = this.state;
+    this.setState({ loading: true });
+    const { email, password } = this.state;
     const user = {
-      name,
       email,
       password,
     };
-    signup(user).then((data) => {
-      if (data.error) this.setState({ error: data.error });
-      else
-        this.setState({
-          error: "",
-          name: "",
-          email: "",
-          password: "",
-          open: true,
+    signin(user).then((data) => {
+      if (data.error) this.setState({ error: data.error, loading: false });
+      else {
+        authenticate(data, () => {
+          this.setState({ redirectToReferer: true });
         });
+      }
     });
   };
-
-  signupForm = (name, email, password) => (
+  signinForm = (email, password) => (
     <form>
-      <div className="form-group">
-        <label className="text-muted">Name</label>
-        <input
-          onChange={this.handleChange("name")}
-          type="text"
-          className="form-control"
-          value={name}
-        />
-      </div>
       <div className="form-group">
         <label className="text-muted">Email</label>
         <input
@@ -72,10 +60,14 @@ class Signup extends Component {
     </form>
   );
   render() {
-    const { name, password, email, error, open } = this.state;
+    const { password, email, error, redirectToReferer, loading } = this.state;
+    if (redirectToReferer) {
+      return <Redirect to="/" />;
+    }
+
     return (
       <div className="container">
-        <h2 className="mt-5 mb-5">Signup</h2>
+        <h2 className="mt-5 mb-5">Signin</h2>
         <hr />
         <div
           className="alert alert-danger"
@@ -83,16 +75,17 @@ class Signup extends Component {
         >
           {error}
         </div>
-        <div
-          className="alert alert-info"
-          style={{ display: open ? "" : "none" }}
-        >
-          New account is successfully created. Please signin!
-        </div>
-        {this.signupForm(name, email, password)}
+        {loading ? (
+          <div className="jumbotron text-center">
+            <h2>Loading...</h2>
+          </div>
+        ) : (
+          ""
+        )}
+        {this.signinForm(email, password)}
       </div>
     );
   }
 }
 
-export default Signup;
+export default Signin;
