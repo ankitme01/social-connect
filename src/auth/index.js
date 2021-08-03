@@ -47,7 +47,7 @@ export const signout=(next)=>{
          .catch(err=>console.log(err));     
     }
 }
-export const isauthenticated=()=>{
+export const isAuthenticated=()=>{
     if (typeof window == 'undefined') {
         return false;
     }
@@ -56,5 +56,15 @@ export const isauthenticated=()=>{
         return JSON.parse(localStorage.getItem('jwt'));
     } else {
         return false;
+    }
+}
+export const updateUser=(user,next)=>{
+    if (typeof window !== "undefined") {
+        if (localStorage.getItem("jwt")) {
+            let auth = JSON.parse(localStorage.getItem("jwt"));
+            auth.user = user;
+            localStorage.setItem("jwt", JSON.stringify(auth));
+            next();
+        }
     }
 }
