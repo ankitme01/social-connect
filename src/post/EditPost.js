@@ -69,7 +69,7 @@ class EditPost extends Component {
         this.setState({ loading: true });
 
         if (this.isValid()) {
-            const postId = this.state.id;
+            const postId = this.props.match.params.postId;
             const token = isAuthenticated().token;
 
             update(postId, token, this.postData).then(data => {
